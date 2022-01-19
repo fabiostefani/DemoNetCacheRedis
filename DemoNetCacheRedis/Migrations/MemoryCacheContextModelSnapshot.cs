@@ -26,7 +26,8 @@ namespace DemoNetCacheRedis.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("IdProduto");
 
                     b.Property<string>("Departamento")
                         .IsRequired()

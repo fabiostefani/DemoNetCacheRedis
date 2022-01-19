@@ -10,6 +10,9 @@ public class ProdutoMapping : IEntityTypeConfiguration<Produto>
     {
         builder.ToTable(nameof(Produto));
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .HasColumnName("IdProduto")
+            .IsRequired();
         builder.Property(x => x.Nome)
             .HasMaxLength(Produto.TamanhoNome)
             .IsRequired()

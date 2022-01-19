@@ -1,4 +1,5 @@
 using DemoNetCacheRedis.Data;
+using DemoNetCacheRedis.Infra;
 using DemoNetCacheRedis.Repositorio;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
                 options.InstanceName = "MemoryCacheContext";
             });
 builder.Services.AddScoped<IProdutoRepositorio, ProdutoRepositorio>();
+builder.Services.AddScoped<ICache, Cache>();
 
 
 var app = builder.Build();

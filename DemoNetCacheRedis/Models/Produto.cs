@@ -8,11 +8,13 @@ public class Produto
 
     public Produto(string nome, string departamento, decimal preco)
     {
-        this.Id = Guid.NewGuid();
+        //this.Id = Guid.NewGuid();
         this.Nome = nome;
         this.Departamento = departamento;
         this.Preco = preco;
     }
+
+    public Produto ( ) { }
     public Guid Id { get; private set; }
     public string Nome { get; private set; }
     public string Departamento { get; private set; }
