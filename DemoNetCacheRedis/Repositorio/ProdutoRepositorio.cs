@@ -39,7 +39,7 @@ public class ProdutoRepositorio : IProdutoRepositorio
             produto = await _ctx.Set<Produto>().FirstOrDefaultAsync(x => x.Id == id);
             DistributedCacheEntryOptions opcoesCache = new DistributedCacheEntryOptions();
             opcoesCache.SetSlidingExpiration(TimeSpan.FromSeconds(10));
-            opcoesCache.SetAbsoluteExpiration(TimeSpan.FromSeconds(15));            
+            opcoesCache.SetAbsoluteExpiration(TimeSpan.FromSeconds(30));            
             produtoJson = JsonSerializer.Serialize(produto);
             await _distributedCache.SetStringAsync(keyValueProdutoId, produtoJson, opcoesCache);
             Console.WriteLine("Recuperou do banco");
@@ -48,43 +48,20 @@ public class ProdutoRepositorio : IProdutoRepositorio
         {
             produto = JsonSerializer.Deserialize<Produto>(produtoJson);
             Console.WriteLine("Recuperou do Cache");
-        }        
-        // string keyValueProdutoId = $"{KeyValueCache}-{id.ToString()}";
-        // Produto produto = await _cache.Get<Produto>(keyValueProdutoId);
-        // //Produto produto;
-        // if (produto == null)
-        // {
-        //     var produtoDb = await _ctx.Set<Produto>().FirstOrDefaultAsync(x => x.Id == id);
-            
-        //     await _cache.Set(keyValueProdutoId, produtoDb, TimeSpan.FromSeconds(15));
-        //     Console.WriteLine("Recuperou do banco");
-        // }
-        // else
-        // {
-        //     //produto = JsonSerializer.Deserialize<Produto>(produtoJson);
-        //     Console.WriteLine("Recuperou do Cache");
-        // }
+        }                
         return produto;
     }
 
     public async Task<IEnumerable<Produto>> ObterTodos()
     {
-        
-
         IEnumerable<Produto> produtos = await _cache.GetAsync<IEnumerable<Produto>>(KeyValueCache);
         if (produtos == null || !produtos.Any())
         {
             produtos = await _ctx.Set<Produto>().ToListAsync();
-
-            // var optionsCache = new CacheConfig()
-            //     .SetSlidingExpiration(TimeSpan.FromSeconds(15))
-            //     .SetAbsoluteExpiration(TimeSpan.FromSeconds(15));
-
-            //await _cache.SetTeste1Async(KeyValueCache, produtos, optionsCache);
-            //await _cache.SetTeste1Async(KeyValueCache, produtos, optionsCache);
-            await _cache.SetTeste2Async(KeyValueCache, produtos, options =>
+            await _cache.SetAsync(KeyValueCache, produtos, options =>
             {
-                options.SetAbsoluteExpiration(TimeSpan.FromSeconds(15));
+                options.SetSlidingExpiration(TimeSpan.FromSeconds(10));
+                options.SetAbsoluteExpiration(TimeSpan.FromSeconds(30));
             });
             Console.WriteLine("Recuperou do banco");
         }
