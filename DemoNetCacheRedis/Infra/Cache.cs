@@ -28,14 +28,18 @@ namespace DemoNetCacheRedis.Infra
 
         private static DistributedCacheEntryOptions SetConfigCache(Action<CacheOptions> options)
         {
-            var opcoesCache = new DistributedCacheEntryOptions();
-            if (options == null) return opcoesCache;
+            var opcoesCache = new DistributedCacheEntryOptions();                        
             var cfg = new CacheOptions();
             options(cfg);
             if (cfg == null) return opcoesCache;
             if (cfg.HasValueAbsoluteExpiration()) opcoesCache.SetAbsoluteExpiration(cfg.AbsoluteExpiration.Value);
             if (cfg.HasValueSlidingExpiration()) opcoesCache.SetSlidingExpiration(cfg.SlidingExpiration.Value);
             return opcoesCache;
+        }
+
+        public async Task InvalidateCache(string key)
+        {
+            await _cache.RemoveAsync(key);
         }
     }   
 }

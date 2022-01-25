@@ -20,6 +20,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
                 options.InstanceName = "MemoryCacheContext";
             });
 builder.Services.AddScoped<IProdutoRepositorio, ProdutoRepositorio>();
+builder.Services.AddScoped<ICategoriaRepositorio, CategoriaRepositorio>();
 builder.Services.AddScoped<ICache, Cache>();
 
 

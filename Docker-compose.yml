@@ -19,9 +19,7 @@ services:
     image: redis:latest
     command: redis-server --requirepass Redis2022!
     ports:
-      - "6379:6379"
-    # networks:
-    #   - redis-network
+      - "6379:6379"    
 
 networks:
   redis-network:

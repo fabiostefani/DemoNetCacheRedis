@@ -12,13 +12,10 @@ public class ProdutoRepositorio : IProdutoRepositorio
     const string KeyValueCache = "Produto";
     private readonly MemoryCacheContext _ctx;
     private readonly IDistributedCache _distributedCache;
-    private readonly ICache _cache;
-
+    
     public ProdutoRepositorio(MemoryCacheContext ctx,
-                              IDistributedCache distributedCache,
-                              ICache cache)
+                              IDistributedCache distributedCache)
     {
-        _cache = cache;
         _ctx = ctx;
         _distributedCache = distributedCache;
     }
@@ -26,7 +23,7 @@ public class ProdutoRepositorio : IProdutoRepositorio
     public async Task<bool> Adicionar(Produto produto)
     {
         _ctx.Set<Produto>().Add(produto);
-        return await _ctx.SaveChangesAsync() > 0;
+        return await _ctx.SaveChangesAsync() > 0;        
     }
 
     public async Task<Produto> ObterPorId(Guid id)
@@ -54,19 +51,22 @@ public class ProdutoRepositorio : IProdutoRepositorio
 
     public async Task<IEnumerable<Produto>> ObterTodos()
     {
-        IEnumerable<Produto> produtos = await _cache.GetAsync<IEnumerable<Produto>>(KeyValueCache);
-        if (produtos == null || !produtos.Any())
+        string produtosJson = await _distributedCache.GetStringAsync(KeyValueCache);
+        IEnumerable<Produto> produtos;
+        if (string.IsNullOrEmpty(produtosJson))        
         {
             produtos = await _ctx.Set<Produto>().ToListAsync();
-            await _cache.SetAsync(KeyValueCache, produtos, options =>
-            {
-                options.SetSlidingExpiration(TimeSpan.FromSeconds(10));
-                options.SetAbsoluteExpiration(TimeSpan.FromSeconds(30));
-            });
+
+            DistributedCacheEntryOptions opcoesCache = new DistributedCacheEntryOptions();
+            opcoesCache.SetSlidingExpiration(TimeSpan.FromSeconds(10));
+            opcoesCache.SetAbsoluteExpiration(TimeSpan.FromSeconds(30));            
+            produtosJson = JsonSerializer.Serialize(produtos);
+            await _distributedCache.SetStringAsync(KeyValueCache, produtosJson, opcoesCache);
             Console.WriteLine("Recuperou do banco");
         }
         else
-        {         
+        {      
+            produtos = JsonSerializer.Deserialize<IEnumerable<Produto>>(produtosJson);   
             Console.WriteLine("Recuperou do Cache");
         }
         return produtos;
